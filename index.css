@@ -1,0 +1,56 @@
+body {
+  background-color: rgb(157, 232, 241);
+}
+/*tried to find the most pokelike font I could*/
+h1 {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  color: rgb(28, 29, 30);
+  margin-top: 5%;
+  margin-left: 2%;
+}
+
+.grid-container {
+  position: absolute;
+  top: 20%;
+  left: 2%;
+  display: grid;
+  grid-gap: 0.5rem;
+  grid-template-columns: repeat(3, 150px);
+}
+
+.type-btn {
+  transition: transform 0.3s ease;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  border-radius: 12px;
+  border: 1.5px solid #000;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+  padding: 10px 20px;
+  background: rgb(124, 215, 230);
+  font-size: 1rem;
+  color: rgb(28, 29, 30);
+}
+/*makes the buttons brighter and bigger when you hoover, I love this so much!*/
+.type-btn:hover {
+  transform: scale(1.06);
+  filter: brightness(115%);
+}
+
+.favourite-list h3 {
+  padding-top: 20px;
+  text-align: center;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  color: rgb(28, 29, 30);
+}
+
+.favourite-list {
+  position: absolute;
+  top: 20%;
+  right: 2%;
+  height: 600px;
+  width: 450px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  border-radius: 50px;
+}
