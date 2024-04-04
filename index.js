@@ -27,24 +27,23 @@ function applyCommonStyles(element) {
   element.style.fontWeight = "bold";
 }
 
-//these buttons are colorcoded by type:
+//these buttons are color coded by type:
 const buttons = document.querySelectorAll(".type-btn");
 buttons.forEach((button) => {
   const type = button.dataset.type;
   const color = typeColors[type];
   button.style.backgroundColor = color;
-  //still working out how to get all the buttons to work:
+//when you click the type button, it initiates the filtering:
   button.addEventListener("click", () => {
     const type = button.dataset.type.toLowerCase();
-    console.log("Clicked type:", type);
+    console.log("Du klikket på type-knappen", type);
     filterPokemonByType(type);
   });
 });
-//this needs more work, some of the cards show up with pokemon, but not all:
+//the function that filters the types:
 function filterPokemonByType(type) {
   const cards = document.querySelectorAll(".pokemon-card");
   cards.forEach((card) => {
-    //throwing in a toLowercase() hoping it will fix my filter isshues, nope, did not...
     const cardType = card.dataset.type.toLowerCase();
     console.log("Type:", type, "Card type:", cardType);
     if (type === cardType) {
@@ -59,14 +58,18 @@ let pokeCount = 0;
 
 //Getting the pokeAPI:
 async function fetchAndDisplayPokemon() {
+
   try {
-    //I should probably fix this so it fetches at least one of each type and not the same pokemon twice:
-    const response = await fetch("https://pokeapi.co/api/v2/pokemon/?limit=50");
+    //I should work more on this, must be a better way to solve it:
+    const response = await fetch(
+      //is it a good idea to fetc 500, I get more types, 
+      //but is there an other way to solve it?:
+      "https://pokeapi.co/api/v2/pokemon/?limit=500"
+    );
     const data = await response.json();
 
     const pokemonList = data.results;
-
-    // desperate act to make it a little more random:
+    //making sure we're random about the pokemon:
     pokemonList.sort(() => Math.random() - 0.5);
     //we start the count on 0:
     let pokeCount = 0;
@@ -76,24 +79,24 @@ async function fetchAndDisplayPokemon() {
       const pokemonData = await pokemonResponse.json();
 
       displayPokemon(pokemonData);
-      console.log("Pokemon name:", pokemonData.name);
+      console.log("Pokemon navn:", pokemonData.name);
       pokeCount++;
-      //this exits the loop when we reach 50:
+      //this exits the loop when we reach 50 pokemon on our site:
       if (pokeCount >= 50) {
         break;
       }
     }
   } catch (error) {
-    console.error("Failed to fetch pokemon", error);
+    console.error("Klarte ikke hente pokemon", error);
   }
 }
 
-//normaly my pref is to do styling in css, but I can do it in js to:
+//normaly my pref. is to do styling in css, but I can do it in js to:
 function displayPokemon(data) {
   const name = data.name;
   const type = data.types[0].type.name;
   const typeColor = typeColors[type];
-  // images are called sprites in th epokeapi,
+  // images are called sprites in the pokeapi,
   //front_default is the one I went with, but they had others to:
   const imageUrl = data.sprites.front_default;
 
@@ -110,11 +113,13 @@ function displayPokemon(data) {
   nameElement.textContent = name;
   nameElement.style.fontSize = "24px";
   applyCommonStyles(nameElement);
+
   //type text:
   const typeElement = document.createElement("p");
   typeElement.textContent = `Type: ${type}`;
   typeElement.style.fontSize = "16px";
   applyCommonStyles(typeElement);
+
   //image:
   const imageElement = document.createElement("img");
   imageElement.src = imageUrl;
@@ -126,27 +131,80 @@ function displayPokemon(data) {
   imageElement.style.width = "400px";
   imageElement.style.height = "400px";
 
+  //edit button:
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Edit";
+  editBtn.classList.add("edit-btn", "cardBtn");
+  editBtn.style.marginLeft = "50px";
+//need to add eventListner here
+
+  //save buttonn:
+  const saveBtn = document.createElement("button");
+  saveBtn.textContent = "Save";
+  saveBtn.classList.add("save-btn", "cardBtn");
+  saveBtn.style.marginLeft = "70px";
+ //need to add eventListner here
+
+  //delete button:
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Delete";
+  deleteBtn.classList.add("delete-btn", "cardBtn");
+  deleteBtn.style.marginLeft = "70px";
+
+
   //make sure everything is appended so I can see it:
   card.appendChild(nameElement);
   card.appendChild(typeElement);
   card.appendChild(imageElement);
+  card.appendChild(editBtn);
+  card.appendChild(saveBtn);
+  card.appendChild(deleteBtn);
 
   cardContainer.appendChild(card);
 
-  //nice and centered:
+  // nice and centered:
   cardContainer.style.display = "flex";
-  cardContainer.style.justifyContent = "center";
-  cardContainer.style.alignItems = "flex-end";
-  //Here I'm styling the card:
-  card.style.position = "absolute";
-  card.style.top = "20%";
+  cardContainer.style.flexDirection = "column";
+  cardContainer.style.alignItems = "center";
+  //styling for my pokemon cards:
+  //need to  realign the top card with the button grid and the list if I have time:
+  card.style.marginBottom = "20px";
+  card.style.position = "relative";
   card.style.width = "500px";
   card.style.height = "600px";
   card.style.borderRadius = "50px";
   card.style.backgroundColor = typeColor;
-  //this part looks weird when the page loads, why?:
   card.style.boxShadow = "0 0 2px rgba(0, 0, 0, 0.4)";
 }
 
-//I am calling on the fetchAndDisplay function:
+//delete function needs work!:
+function deletePokemonData() {
+
+}
+
+//edit function:
+function editPokemonData() {}
+
+//save function (only saves to local, 
+//need to fix the saving to the favourite list to):
+
+function savePokemonData(pokemonName, pokemonType) {
+  try {
+    const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
+
+    savedPokemon.push({ name: pokemonName, type: pokemonType });
+
+    localStorage.setItem("savedPokemon", JSON.stringify(savedPokemon));
+
+    if (savedPokemon.length >= 5) {
+      alert(
+        "Maksgrense er nådd, du må slette en lagret pokemon for å få plass til en ny"
+      );
+      return;
+    }
+  } catch (error) {
+    console.error("Klarte ikke lagre pokemon til localStorage", error);
+  }
+}
+
 fetchAndDisplayPokemon();
