@@ -1,3 +1,4 @@
+//there is so much code, must be a way to simplyfy...
 //type based color-array:
 const typeColors = {
   bug: "rgb(148, 188, 74)",
@@ -20,7 +21,7 @@ const typeColors = {
   water: "rgb(83, 154, 226)",
 };
 
-//Because I used this on two things:
+//Because I used this on several things:
 function applyCommonStyles(element) {
   element.style.textAlign = "center";
   element.style.fontFamily = "Courier New, Courier, monospace";
@@ -143,7 +144,8 @@ function displayPokemon(data) {
   saveBtn.textContent = "Save";
   saveBtn.classList.add("save-btn", "cardBtn");
   saveBtn.style.marginLeft = "70px";
- //need to add eventListner here
+  //fixed this:
+    saveBtn.addEventListener("click", () => savePokemonData(name, type));
 
   //delete button:
   const deleteBtn = document.createElement("button");
@@ -185,16 +187,59 @@ function deletePokemonData() {
 //edit function:
 function editPokemonData() {}
 
-//save function (only saves to local, 
-//need to fix the saving to the favourite list to):
+//getting namne/type to show up in the list, but need picture to:
+function showSavedPokemonList() {
+  const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
+  const favouriteListContainer = document.getElementById("favourite-pokemon-list");
 
-function savePokemonData(pokemonName, pokemonType) {
+  savedPokemon.forEach((pokemon) => {
+    const name = pokemon.name;
+  const type = pokemon.type;
+
+    const listItem = document.createElement("li");
+    listItem.classList.add("saved-pokemon");
+
+const textContainer = document.createElement("div");
+textContainer.classList.add("pokemon-info");
+
+const nameElement = document.createElement("p");
+nameElement.textContent = name;
+
+const typeElement = document.createElement("p");
+typeElement.textContent = type;
+
+textContainer.appendChild(nameElement);
+textContainer.appendChild(typeElement);
+
+    listItem.appendChild(textContainer);
+
+    favouriteListContainer.appendChild(listItem);
+  });
+}
+
+//saving to local storage and list:
+function savePokemonData(pokemonName, pokemonType, spriteURL) {
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
-
-    savedPokemon.push({ name: pokemonName, type: pokemonType });
+//Had to fix this so I don't save the same over and over:
+    const existingPokemon = savedPokemon.find(pokemon => pokemon.name === pokemonName && pokemon.type === pokemonType);
+    if (existingPokemon) {
+      alert(`${pokemonName} er allerede lagret`);
+      return;
+    }
+//adding pokemon to my array here:
+    savedPokemon.push({ name: pokemonName, type: pokemonType, spriteURL: spriteURL });
 
     localStorage.setItem("savedPokemon", JSON.stringify(savedPokemon));
+
+    alert(`Du har lagret ${pokemonName} til "my favorite pokemon" listen og localStorage`);
+
+    const favouriteListContainer = document.getElementById("favourite-pokemon-list");
+    if (favouriteListContainer){
+const listItem = document.createElement("li");
+listItem.textContent = `${pokemonName} - ${pokemonType}`;
+favouriteListContainer.appendChild(listItem);
+    }
 
     if (savedPokemon.length >= 5) {
       alert(
@@ -203,8 +248,11 @@ function savePokemonData(pokemonName, pokemonType) {
       return;
     }
   } catch (error) {
-    console.error("Klarte ikke lagre pokemon til localStorage", error);
+    console.error("Klarte ikke lagre pokemon til dine favoritter localStorage", error);
   }
 }
 
 fetchAndDisplayPokemon();
+
+showSavedPokemonList();
+

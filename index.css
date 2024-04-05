@@ -71,3 +71,8 @@ h1 {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
   border-radius: 50px;
 }
+
+#favourite-pokemon-list {
+  list-style: none;
+  font-family: "Courier New", Courier, monospace;
+}
