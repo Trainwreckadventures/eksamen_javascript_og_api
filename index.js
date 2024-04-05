@@ -1,6 +1,4 @@
-//there is so much code, must be a way to simplyfy...
-//type based color-array:
-const typeColors = {
+const typeColors = { //type based color-array:
   bug: "rgb(148, 188, 74)",
   dark: "rgb(115, 108, 117)",
   dragon: "rgb(106, 123, 175)",
@@ -21,28 +19,25 @@ const typeColors = {
   water: "rgb(83, 154, 226)",
 };
 
-//Because I used this on several things:
-function applyCommonStyles(element) {
+function applyCommonStyles(element) { // I used these tyles on more than one thing so I am trying to optimize
   element.style.textAlign = "center";
   element.style.fontFamily = "Courier New, Courier, monospace";
   element.style.fontWeight = "bold";
 }
 
-//these buttons are color coded by type:
-const buttons = document.querySelectorAll(".type-btn");
+const buttons = document.querySelectorAll(".type-btn"); //these buttons are color coded by type:
 buttons.forEach((button) => {
   const type = button.dataset.type;
   const color = typeColors[type];
   button.style.backgroundColor = color;
-//when you click the type button, it initiates the filtering:
-  button.addEventListener("click", () => {
+  button.addEventListener("click", () => { //when you click the type button, it initiates the filtering
     const type = button.dataset.type.toLowerCase();
     console.log("Du klikket på type-knappen", type);
     filterPokemonByType(type);
   });
 });
-//the function that filters the types:
-function filterPokemonByType(type) {
+
+function filterPokemonByType(type) { //the function that filters the types:
   const cards = document.querySelectorAll(".pokemon-card");
   cards.forEach((card) => {
     const cardType = card.dataset.type.toLowerCase();
@@ -54,25 +49,18 @@ function filterPokemonByType(type) {
     }
   });
 }
-//Counting, since I'm only supposed to fetch 50 pokemon:
-let pokeCount = 0;
 
-//Getting the pokeAPI:
-async function fetchAndDisplayPokemon() {
-
+async function fetchAndDisplayPokemon() { //Getting the pokeAPI:
   try {
-    //I should work more on this, must be a better way to solve it:
     const response = await fetch(
-      //is it a good idea to fetc 500, I get more types, 
-      //but is there an other way to solve it?:
-      "https://pokeapi.co/api/v2/pokemon/?limit=500"
+      "https://pokeapi.co/api/v2/pokemon/?limit=500" //getting pokemon from the API
     );
-    const data = await response.json();
 
+    const data = await response.json();
     const pokemonList = data.results;
-    //making sure we're random about the pokemon:
-    pokemonList.sort(() => Math.random() - 0.5);
-    //we start the count on 0:
+
+    pokemonList.sort(() => Math.random() - 0.5); //making sure we're random about the pokemon:
+
     let pokeCount = 0;
 
     for (const pokemon of pokemonList) {
@@ -81,25 +69,27 @@ async function fetchAndDisplayPokemon() {
 
       displayPokemon(pokemonData);
       console.log("Pokemon navn:", pokemonData.name);
-      pokeCount++;
-      //this exits the loop when we reach 50 pokemon on our site:
-      if (pokeCount >= 50) {
+
+    
+      pokeCount++; //adding more pokemon
+
+      if (pokeCount >= 50) { //this exits the loop when we reach 50 pokemon on our site
         break;
       }
     }
   } catch (error) {
+
     console.error("Klarte ikke hente pokemon", error);
   }
 }
 
-//normaly my pref. is to do styling in css, but I can do it in js to:
-function displayPokemon(data) {
+function displayPokemon(data) { //normaly my pref. is to do styling in css, but I wanted to have a go at styling in js to
+
   const name = data.name;
   const type = data.types[0].type.name;
   const typeColor = typeColors[type];
-  // images are called sprites in the pokeapi,
-  //front_default is the one I went with, but they had others to:
-  const imageUrl = data.sprites.front_default;
+
+  const imageUrl = data.sprites.front_default; //images are called sprites in the pokeapi, and they have multipel images to choose from
 
   const cardContainer = document.querySelector(".card-container");
 
@@ -108,54 +98,45 @@ function displayPokemon(data) {
 
   card.dataset.type = type.toLowerCase();
 
-  //I can also create elements directly in js
-  //name text:
-  const nameElement = document.createElement("h3");
-  nameElement.textContent = name;
+  const nameElement = document.createElement("h3"); //creating elements directly in js
+
+  nameElement.textContent = name; //name text
   nameElement.style.fontSize = "24px";
   applyCommonStyles(nameElement);
 
-  //type text:
-  const typeElement = document.createElement("p");
+  const typeElement = document.createElement("p");  //type text 
   typeElement.textContent = `Type: ${type}`;
   typeElement.style.fontSize = "16px";
   applyCommonStyles(typeElement);
 
-  //image:
-  const imageElement = document.createElement("img");
+  const imageElement = document.createElement("img");  //image
   imageElement.src = imageUrl;
   imageElement.alt = name;
-  //This was not as easy as the textAlign,
-  //mental note that images needs a different approach from text:
-  imageElement.style.display = "block";
+  imageElement.style.display = "block"; 
   imageElement.style.margin = "0 auto";
-  imageElement.style.width = "400px";
-  imageElement.style.height = "400px";
+  imageElement.style.width = "250px";
+  imageElement.style.height = "250px";
+  imageElement.style.marginTop = "30px";
+  imageElement.style.marginBottom = "50px";
 
-  //edit button:
-  const editBtn = document.createElement("button");
+  const editBtn = document.createElement("button");  //edit button:
   editBtn.textContent = "Edit";
   editBtn.classList.add("edit-btn", "cardBtn");
-  editBtn.style.marginLeft = "50px";
+  editBtn.style.marginLeft = "40px";
 //need to add eventListner here
 
-  //save buttonn:
-  const saveBtn = document.createElement("button");
+  const saveBtn = document.createElement("button");  //save button:
   saveBtn.textContent = "Save";
   saveBtn.classList.add("save-btn", "cardBtn");
-  saveBtn.style.marginLeft = "70px";
-  //fixed this:
-    saveBtn.addEventListener("click", () => savePokemonData(name, type));
+  saveBtn.style.marginLeft = "30px";
+  saveBtn.addEventListener("click", () => savePokemonData(name, type));
 
-  //delete button:
-  const deleteBtn = document.createElement("button");
+  const deleteBtn = document.createElement("button");  //delete button:
   deleteBtn.textContent = "Delete";
   deleteBtn.classList.add("delete-btn", "cardBtn");
-  deleteBtn.style.marginLeft = "70px";
+  deleteBtn.style.marginLeft = "25px";
 
-
-  //make sure everything is appended so I can see it:
-  card.appendChild(nameElement);
+  card.appendChild(nameElement);  //make sure everything is appended so I can see it
   card.appendChild(typeElement);
   card.appendChild(imageElement);
   card.appendChild(editBtn);
@@ -164,81 +145,76 @@ function displayPokemon(data) {
 
   cardContainer.appendChild(card);
 
-  // nice and centered:
   cardContainer.style.display = "flex";
   cardContainer.style.flexDirection = "column";
   cardContainer.style.alignItems = "center";
-  //styling for my pokemon cards:
-  //need to  realign the top card with the button grid and the list if I have time:
-  card.style.marginBottom = "20px";
+
+  card.style.marginTop = "40px";
+  card.style.marginBottom = "20px";  //styling for my pokemon cards
   card.style.position = "relative";
-  card.style.width = "500px";
-  card.style.height = "600px";
+  card.style.width = "350px";
+  card.style.height = "500px";
   card.style.borderRadius = "50px";
   card.style.backgroundColor = typeColor;
-  card.style.boxShadow = "0 0 2px rgba(0, 0, 0, 0.4)";
+  card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
 
-//delete function needs work!:
-function deletePokemonData() {
+function deletePokemonData() { //delete function
+}
+
+function editPokemonData() { //edit function:
 
 }
 
-//edit function:
-function editPokemonData() {}
-
-//getting namne/type to show up in the list, but need picture to:
-function showSavedPokemonList() {
+function showSavedPokemonList() { //pokemon gets added to the list visually
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
   const favouriteListContainer = document.getElementById("favourite-pokemon-list");
 
   savedPokemon.forEach((pokemon) => {
-    const name = pokemon.name;
+  const name = pokemon.name;
   const type = pokemon.type;
 
-    const listItem = document.createElement("li");
-    listItem.classList.add("saved-pokemon");
+  const listItem = document.createElement("li");
+  listItem.classList.add("saved-pokemon");
 
-const textContainer = document.createElement("div");
-textContainer.classList.add("pokemon-info");
+  const textContainer = document.createElement("div");
+ textContainer.classList.add("pokemon-info");
 
-const nameElement = document.createElement("p");
-nameElement.textContent = name;
+  const nameElement = document.createElement("p");
+  nameElement.textContent = name;
 
-const typeElement = document.createElement("p");
-typeElement.textContent = type;
+  const typeElement = document.createElement("p");
+  typeElement.textContent = type;
 
 textContainer.appendChild(nameElement);
 textContainer.appendChild(typeElement);
 
-    listItem.appendChild(textContainer);
-
-    favouriteListContainer.appendChild(listItem);
+favouriteListContainer.appendChild(listItem);
   });
 }
 
-//saving to local storage and list:
-function savePokemonData(pokemonName, pokemonType, spriteURL) {
+function savePokemonData(pokemonName, pokemonType, spriteURL) { //saving pokemon to local storage and list
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
-//Had to fix this so I don't save the same over and over:
     const existingPokemon = savedPokemon.find(pokemon => pokemon.name === pokemonName && pokemon.type === pokemonType);
+
     if (existingPokemon) {
       alert(`${pokemonName} er allerede lagret`);
       return;
     }
-//adding pokemon to my array here:
-    savedPokemon.push({ name: pokemonName, type: pokemonType, spriteURL: spriteURL });
+
+    savedPokemon.push({ name: pokemonName, type: pokemonType}); 
 
     localStorage.setItem("savedPokemon", JSON.stringify(savedPokemon));
 
     alert(`Du har lagret ${pokemonName} til "my favorite pokemon" listen og localStorage`);
 
     const favouriteListContainer = document.getElementById("favourite-pokemon-list");
+
     if (favouriteListContainer){
-const listItem = document.createElement("li");
-listItem.textContent = `${pokemonName} - ${pokemonType}`;
-favouriteListContainer.appendChild(listItem);
+     const listItem = document.createElement("li");
+     listItem.textContent = `${pokemonName} - ${pokemonType}`;
+     favouriteListContainer.appendChild(listItem);
     }
 
     if (savedPokemon.length >= 5) {
@@ -253,6 +229,5 @@ favouriteListContainer.appendChild(listItem);
 }
 
 fetchAndDisplayPokemon();
-
 showSavedPokemonList();
 
