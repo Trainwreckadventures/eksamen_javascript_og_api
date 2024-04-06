@@ -1,3 +1,4 @@
+//there must be a way to simplify the code for reuse so it's not as long...
 const typeColors = { //type based color-array:
   bug: "rgb(148, 188, 74)",
   dark: "rgb(115, 108, 117)",
@@ -50,6 +51,7 @@ function filterPokemonByType(type) { //the function that filters the types:
 }
 
 const allTypesBtn = document.querySelector("#all-types-btn"); //made a button so you can see all types 
+allTypesBtn.addEventListener("click", showAllTypes); //calling the function for all types
 
 function showAllTypes() {  
   const cards = document.querySelectorAll(".pokemon-card");
@@ -58,14 +60,25 @@ function showAllTypes() {
   })
 }
 
-allTypesBtn.addEventListener("click", showAllTypes); //calling the function for all types
+const makeYourOwnBtn = document.querySelector("#make-your-own-btn");
+makeYourOwnBtn.addEventListener("click", makeYourOwnPokemon)
+
+//need to work more on this:
+function makeYourOwnPokemon() {
+  const myName = prompt("Skriv navnet på din pokemon");
+  const myType = prompt("Skriv typen til din pokemon");
+
+  if(myName && myType) {
+    displayPokemon({ name: myName, types: [{ type: { name: myType } }] });
+  }
+}
 
 let pokemonID = 0;
 
 async function fetchAndDisplayPokemon() { //Getting the pokeAPI:
   try {
     const response = await fetch(
-      "https://pokeapi.co/api/v2/pokemon/?limit=500" //getting pokemon from the API
+      "https://pokeapi.co/api/v2/pokemon/?limit=500" //getting pokemon from the API (500 is still a lot)
     );
 
     const data = await response.json();
@@ -125,12 +138,16 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   imageElement.style.marginTop = "30px";
   imageElement.style.marginBottom = "50px";
 
-
   const editBtn = document.createElement("button");  //edit button:
   editBtn.textContent = "Edit";
   editBtn.classList.add("edit-btn", "cardBtn");
   editBtn.style.marginLeft = "40px";
-//need to add eventListner here
+  editBtn.addEventListener("click", () => {
+    const card = editBtn.closest(".pokemon-card");
+    const nameElement = card.querySelector("h3");
+    const typeElement = card.querySelector("p");
+    editPokemonData(nameElement, typeElement);
+  });
 
   const saveBtn = document.createElement("button");  //save button:
   saveBtn.textContent = "Save";
@@ -166,7 +183,7 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   card.style.backgroundColor = typeColor;
   card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
-
+  //delete only affects localStorage and favourite list, need to fix:
 function deletePokemonData(pokemonID) { 
   try {
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || []; 
@@ -176,21 +193,44 @@ function deletePokemonData(pokemonID) {
   const listItemToRemove = document.getElementById("favourite-pokemon-list").querySelector(`li[data-id="${pokemonID}"]`);
   listItemToRemove && listItemToRemove.remove(); //removing pokemon from the list and the storage
 
-  //can't get the picture to go away, why? 
 } catch (error) {
   console.error("Her gikk noe galt", error);
 }
 }
+//the edit function doesn't affect localStorage or the favourite list, need to fix:
+function editPokemonData(nameElement, typeElement) { 
+  const newName = prompt("Enter the new name:");
+  const newType = prompt("Enter the new type:");
 
-function editPokemonData() { //edit function:
+  if (newName && newType) {
+    nameElement.textContent = newName;
+    typeElement.textContent = `Type: ${newType}`;
 
+    const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
+    const updatedPokemon = savedPokemon.map(pokemon => {
+      if (pokemon.name === nameElement.textContent && pokemon.type === typeElement.textContent) {
+        return { name: newName, type: newType };
+      } else {
+        return pokemon;
+      }
+    });
+
+    localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
+
+    const listItem = nameElement.closest("li");
+    if (listItem) {
+      listItem.textContent = `${newName} - ${newType}`;
+      listItem.dataset.name = newName;
+      listItem.dataset.type = newType;
+    }
+  }
 }
 
 function showSavedPokemonList() { //pokemon gets added to my favourite pokemon list
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
   const favouriteListContainer = document.getElementById("favourite-pokemon-list");
 
-  //favouriteListContainer.innerHTML= "";
+favouriteListContainer.innerHTML= ""; //emptying the list
 
   savedPokemon.forEach((pokemon) => {
   const name = pokemon.name;
@@ -201,17 +241,22 @@ function showSavedPokemonList() { //pokemon gets added to my favourite pokemon l
 
   const textContainer = document.createElement("div");
  textContainer.classList.add("pokemon-info");
-
+ 
   const nameElement = document.createElement("p");
   nameElement.textContent = name;
 
   const typeElement = document.createElement("p");
-  typeElement.textContent = type;
+  typeElement.textContent = `Type ${type}`;
 
 textContainer.appendChild(nameElement);
 textContainer.appendChild(typeElement);
 
+const typeColor = typeColors[type.toLowerCase()];
+listItem.style.backgroundColor = typeColor;
+
+listItem.appendChild(textContainer)
 favouriteListContainer.appendChild(listItem);
+
   });
 }
 
