@@ -32,7 +32,6 @@ buttons.forEach((button) => {
   button.style.backgroundColor = color;
   button.addEventListener("click", () => { //when you click the type button, it initiates the filtering
     const type = button.dataset.type.toLowerCase();
-    console.log("Du klikket på type-knappen", type);
     filterPokemonByType(type);
   });
 });
@@ -50,6 +49,19 @@ function filterPokemonByType(type) { //the function that filters the types:
   });
 }
 
+const allTypesBtn = document.querySelector("#all-types-btn"); //made a button so you can see all types 
+
+function showAllTypes() {  
+  const cards = document.querySelectorAll(".pokemon-card");
+  cards.forEach((card) => {
+    card.style.display = "block";
+  })
+}
+
+allTypesBtn.addEventListener("click", showAllTypes); //calling the function for all types
+
+let pokemonID = 0;
+
 async function fetchAndDisplayPokemon() { //Getting the pokeAPI:
   try {
     const response = await fetch(
@@ -61,19 +73,15 @@ async function fetchAndDisplayPokemon() { //Getting the pokeAPI:
 
     pokemonList.sort(() => Math.random() - 0.5); //making sure we're random about the pokemon:
 
-    let pokeCount = 0;
-
     for (const pokemon of pokemonList) {
       const pokemonResponse = await fetch(pokemon.url);
       const pokemonData = await pokemonResponse.json();
 
-      displayPokemon(pokemonData);
+      displayPokemon(pokemonData, pokemonID);
+      pokemonID++;
       console.log("Pokemon navn:", pokemonData.name);
 
-    
-      pokeCount++; //adding more pokemon
-
-      if (pokeCount >= 50) { //this exits the loop when we reach 50 pokemon on our site
+      if (pokemonID >= 50) { //this exits the loop when we reach 50 pokemon on our site
         break;
       }
     }
@@ -88,15 +96,13 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   const name = data.name;
   const type = data.types[0].type.name;
   const typeColor = typeColors[type];
-
-  const imageUrl = data.sprites.front_default; //images are called sprites in the pokeapi, and they have multipel images to choose from
+  const imageUrl = data.sprites.front_default; //images are called sprites in the pokeapi, and they have multiple images to choose from
 
   const cardContainer = document.querySelector(".card-container");
 
   const card = document.createElement("div");
   card.classList.add("pokemon-card");
-
-  card.dataset.type = type.toLowerCase();
+  card.dataset.type =data.types[0].type.name.toLowerCase();
 
   const nameElement = document.createElement("h3"); //creating elements directly in js
 
@@ -109,7 +115,7 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   typeElement.style.fontSize = "16px";
   applyCommonStyles(typeElement);
 
-  const imageElement = document.createElement("img");  //image
+  const imageElement = document.createElement("img");  //image for the card
   imageElement.src = imageUrl;
   imageElement.alt = name;
   imageElement.style.display = "block"; 
@@ -118,6 +124,7 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   imageElement.style.height = "250px";
   imageElement.style.marginTop = "30px";
   imageElement.style.marginBottom = "50px";
+
 
   const editBtn = document.createElement("button");  //edit button:
   editBtn.textContent = "Edit";
@@ -129,12 +136,13 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   saveBtn.textContent = "Save";
   saveBtn.classList.add("save-btn", "cardBtn");
   saveBtn.style.marginLeft = "30px";
-  saveBtn.addEventListener("click", () => savePokemonData(name, type));
+  saveBtn.addEventListener("click", () => savePokemonData(name, type)); //calling on my save function
 
   const deleteBtn = document.createElement("button");  //delete button:
   deleteBtn.textContent = "Delete";
   deleteBtn.classList.add("delete-btn", "cardBtn");
   deleteBtn.style.marginLeft = "25px";
+  deleteBtn.addEventListener("click", () => deletePokemonData(card.dataset.id)); //calling on my delete function
 
   card.appendChild(nameElement);  //make sure everything is appended so I can see it
   card.appendChild(typeElement);
@@ -149,8 +157,8 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   cardContainer.style.flexDirection = "column";
   cardContainer.style.alignItems = "center";
 
-  card.style.marginTop = "40px";
   card.style.marginBottom = "20px";  //styling for my pokemon cards
+  card.style.marginTop = "40px";
   card.style.position = "relative";
   card.style.width = "350px";
   card.style.height = "500px";
@@ -159,16 +167,30 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
 
-function deletePokemonData() { //delete function
+function deletePokemonData(pokemonID) { 
+  try {
+  const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || []; 
+  const updatedPokemon = savedPokemon.filter(pokemon => pokemon.id !== pokemonID);
+  localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
+
+  const listItemToRemove = document.getElementById("favourite-pokemon-list").querySelector(`li[data-id="${pokemonID}"]`);
+  listItemToRemove && listItemToRemove.remove(); //removing pokemon from the list and the storage
+
+  //can't get the picture to go away, why? 
+} catch (error) {
+  console.error("Her gikk noe galt", error);
+}
 }
 
 function editPokemonData() { //edit function:
 
 }
 
-function showSavedPokemonList() { //pokemon gets added to the list visually
+function showSavedPokemonList() { //pokemon gets added to my favourite pokemon list
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
   const favouriteListContainer = document.getElementById("favourite-pokemon-list");
+
+  //favouriteListContainer.innerHTML= "";
 
   savedPokemon.forEach((pokemon) => {
   const name = pokemon.name;
@@ -193,7 +215,7 @@ favouriteListContainer.appendChild(listItem);
   });
 }
 
-function savePokemonData(pokemonName, pokemonType, spriteURL) { //saving pokemon to local storage and list
+function savePokemonData(pokemonName, pokemonType, pokemonID) { //saving pokemon to local storage and list
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
     const existingPokemon = savedPokemon.find(pokemon => pokemon.name === pokemonName && pokemon.type === pokemonType);
@@ -214,6 +236,7 @@ function savePokemonData(pokemonName, pokemonType, spriteURL) { //saving pokemon
     if (favouriteListContainer){
      const listItem = document.createElement("li");
      listItem.textContent = `${pokemonName} - ${pokemonType}`;
+     listItem.dataset.id = pokemonID;
      favouriteListContainer.appendChild(listItem);
     }
 
