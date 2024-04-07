@@ -18,6 +18,7 @@ const typeColors = { //type based color-array:
   rock: "rgb(178, 160, 97)",
   steel: "rgb(137, 161, 176)",
   water: "rgb(83, 154, 226)",
+  none: "rgb(124, 215, 230)"
 };
 
 function applyCommonStyles(element) { // I used these tyles on more than one thing so I am trying to optimize
@@ -75,7 +76,7 @@ function makeYourOwnPokemon() {
 
 async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
   try {
-    let pokemonID = 0; // giving the pokemon individual id as they load
+    let pokemonID = 1; // giving the pokemon individual id as they load
     let offset = 0; 
     const typesCount = new Map(); //keeping track of the types I have encountered
     const fetchedURL = new Set(); //keeping track of the pokemon I have loaded
@@ -118,8 +119,8 @@ async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
 
       offset += 400; //starting 400 spots away from where I started in the api (pagination is usefull)
       if (offset >= data.count || pokemonID >= 50) {
-        break; 
-      } //I had to get chat gpt to explain the consept of pagination to me as if I was a child...
+        break;  //I had to get chat gpt to explain the consept of pagination to me as if I was a child...
+      } 
     }
   } catch (error) {
     console.error("Failed to fetch Pokémon", error);
@@ -206,20 +207,20 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
   //delete only affects localStorage and favourite list, need to fix:
-function deletePokemonData(pokemonID) { 
-  try {
-  const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || []; 
-  const updatedPokemon = savedPokemon.filter(pokemon => pokemon.id !== pokemonID);
-  localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
-
-  const listItemToRemove = document.getElementById("favourite-pokemon-list").querySelector(`li[data-id="${pokemonID}"]`);
-  listItemToRemove && listItemToRemove.remove(); //removing pokemon from the list and the storage
-
-  fetchAndDisplayPokemon();
-} catch (error) {
-  console.error("Her gikk noe galt", error);
-}
-}
+  function deletePokemonData(pokemonID) { 
+    try {
+    const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || []; 
+    const updatedPokemon = savedPokemon.filter(pokemon => pokemon.id !== pokemonID);
+    localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
+  
+    const listItemToRemove = document.getElementById("favourite-pokemon-list").querySelector(`li[data-id="${pokemonID}"]`);
+    listItemToRemove && listItemToRemove.remove(); //removing pokemon from the list and the storage
+  
+    fetchAndDisplayPokemon();
+  } catch (error) {
+    console.error("Her gikk noe galt", error);
+  }
+  }
 //the edit function doesn't affect localStorage or the favourite list, need to fix:
 function editPokemonData(nameElement, typeElement) { 
   const newName = prompt("Enter the new name:");
@@ -321,4 +322,5 @@ function savePokemonData(pokemonName, pokemonType, pokemonID) { //saving pokemon
 
 fetchAndDisplayPokemon();
 showSavedPokemonList();
+
 
