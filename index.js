@@ -73,34 +73,56 @@ function makeYourOwnPokemon() {
   }
 }
 
-let pokemonID = 0;
-
-async function fetchAndDisplayPokemon() { //Getting the pokeAPI:
+async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
   try {
-    const response = await fetch(
-      "https://pokeapi.co/api/v2/pokemon/?limit=500" //getting pokemon from the API (500 is still a lot)
-    );
+    let pokemonID = 0; // giving the pokemon individual id as they load
+    let offset = 0; 
+    const typesCount = new Map(); //keeping track of the types I have encountered
+    const fetchedURL = new Set(); //keeping track of the pokemon I have loaded
 
-    const data = await response.json();
-    const pokemonList = data.results;
+    Object.keys(typeColors).forEach(type => {
+      typesCount.set(type, 0);
+    });
 
-    pokemonList.sort(() => Math.random() - 0.5); //making sure we're random about the pokemon:
+    while (pokemonID < 50) {
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/?limit=50&offset=${offset}` //fetching 50 pokemon, the offset is part of the pagination
+      );
+      const data = await response.json();
+      const pokemonList = data.results;
 
-    for (const pokemon of pokemonList) {
-      const pokemonResponse = await fetch(pokemon.url);
-      const pokemonData = await pokemonResponse.json();
+        pokemonList.sort(() => Math.random() - 0.5); //making the fetch a little random
 
-      displayPokemon(pokemonData, pokemonID);
-      pokemonID++;
-      console.log("Pokemon navn:", pokemonData.name);
+      for (const pokemon of pokemonList) { //when we reach 50 it stops
+        if (pokemonID >= 50) { 
+          break;
+        }
+        if(fetchedURL.has(pokemon.url)){ //because of the pokemonID, I have to make sure I don't fetch the same pokemon twice
+          continue;
+        }
 
-      if (pokemonID >= 50) { //this exits the loop when we reach 50 pokemon on our site
-        break;
+        const pokemonResponse = await fetch(pokemon.url);
+        const pokemonData = await pokemonResponse.json();
+
+        const pokemonType = pokemonData.types[0].type.name;
+
+        if (typesCount.get(pokemonType) < 3) { // making sure we get at least 3 of each type
+          displayPokemon(pokemonData, pokemonID);
+          pokemonID++;
+
+          typesCount.set(pokemonType, typesCount.get(pokemonType) + 1);
+          console.log("Pokemon name:", pokemonData.name);
+   
+        }
       }
+
+      offset += 400; //starting 400 spots away from where I started in the api (pagination is usefull)
+      if (offset >= data.count || pokemonID >= 50) {
+        break; 
+      } //I had to get chat gpt to explain the consept of pagination to me as if I was a child...
     }
   } catch (error) {
-
-    console.error("Klarte ikke hente pokemon", error);
+    console.error("Failed to fetch Pokémon", error);
   }
 }
 
@@ -193,6 +215,7 @@ function deletePokemonData(pokemonID) {
   const listItemToRemove = document.getElementById("favourite-pokemon-list").querySelector(`li[data-id="${pokemonID}"]`);
   listItemToRemove && listItemToRemove.remove(); //removing pokemon from the list and the storage
 
+  fetchAndDisplayPokemon();
 } catch (error) {
   console.error("Her gikk noe galt", error);
 }
