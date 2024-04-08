@@ -7,6 +7,56 @@
     <title>oppgave_2_battle</title>
   </head>
   <body>
+    <!--brukers pokemon-->
+    <div class="main-container">
+      <div class="pokemon-healthbar-containers">
+        <div class="pokemon-healthbar-container">
+          <div class="healthbar bulbasaur-health"></div>
+          <div class="text-container">
+            <p id="bulbasaur-name-txt">Bulbasaur</p>
+            <p id="bulbasaur-health-txt">40/40</p>
+          </div>
+        </div>
+        <div class="pokemon-healthbar-container">
+          <div class="healthbar squirtle-health"></div>
+          <div class="text-container">
+            <p id="squirtle-name-txt">Squirtle</p>
+            <p id="squirtle-health-txt">80/80</p>
+          </div>
+        </div>
+        <div class="pokemon-healthbar-container">
+          <div class="healthbar ditto-health"></div>
+          <div class="text-container">
+            <p id="ditto-name-txt">Ditto</p>
+            <p id="ditto-health-txt">20/20</p>
+          </div>
+        </div>
+      </div>
+    </div>
+<!--pokemon boss-->
+<div class="pokemonboss-health-container">
+  <div class="healthbar-container"></div>
+  <div class="healthbar pokemonboss-health"></div>
+  <div class="text-container"></div>
+  <p id="pokemonboss-name-txt">Totodile</p>
+  <div class="text-container pokemonboss-health-txt">200/200</div>
+</div>
+<!--pokemon images-->
+<div class="img-container bulbasaur">
+<img class="pokemon" src="assets/bulbasaur.png" />
+</div>
+<div class="img-container squirtle">
+  <img class="pokemon" src="assets/squirtle.png" />
+  </div>
+    <div class="img-container ditto">
+      <img class="pokemon" src="assets/ditto.png" />
+      </div>
+      <!--pokemon boss image-->
+      <div class="pokemonboss-container">
+        <div class="img-container boss-container">
+          <img class="boss" src="assets/totodile.png">
+        </div>
+      </div>
     <script src="battle.js"></script>
   </body>
 </html>
