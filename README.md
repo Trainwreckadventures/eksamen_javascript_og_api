@@ -32,4 +32,8 @@ https://www.pokemonaaah.net/artsyfartsy/colordex/
 and translated to rgb with: 
 https://www.rapidtables.com/convert/color/hex-to-rgb.html)
 
-//Number of students working on this project: 1 (Hi, I'm the student/problem it's me).
+images from:
+https://www.freeiconspng.com/
+https://www.cleanpng.com/
+
+Number of students working on this project: 1 (Hi, I'm the student/problem it's me).
