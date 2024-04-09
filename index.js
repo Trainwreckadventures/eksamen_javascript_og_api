@@ -283,12 +283,17 @@ function saveEditedPokemonData(originalName, originalType, newName, newType) {
 
   localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
 
-showSavedPokemonList();
+const pokemonListItems = document.querySelectorAll(".saved-pokemon");
+pokemonListItems.forEach(item => {
+  if (item.dataset.name === originalName.toLowerCase()){
+    item.querySelector("p").textContent = newName;
+    item.dataset.name = newName.toLowerCase();
+  }
+});
   } catch (error) {
     console.error("klarte ikke oppdatere nytt pokemonnavn eller ny type");
   }
 }
-
 
 function showSavedPokemonList() { //pokemon gets added to my favourite pokemon list
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
