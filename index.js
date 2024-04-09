@@ -72,10 +72,12 @@ function makeYourOwnPokemon() {
     displayPokemon({ name: myName, types: [{ type: { name: myType } }] });
   }
 }
-
+//made an array for the pokemon:
+let pokemonDataArray = [];
+//fixed it so it fetches 50 and not 49 pkm:
 async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
   try {
-    let pokemonID = 1; // giving the pokemon individual id as they load
+    let pokemonID = 0; // giving the pokemon individual id as they load
     let offset = 0; 
     const typesCount = new Map(); //keeping track of the types I have encountered
     const fetchedURL = new Set(); //keeping track of the pokemon I have loaded
@@ -120,6 +122,9 @@ async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
         break;  //breaks the while loop
       } //I had to get chat gpt to explain the consept of pagination to me as if I was a child...
     }
+    pokemonDataArray.forEach((pokemonData, index) => {
+      displayPokemon(pokemonData, index);
+    })
   } catch (error) {
     console.error("Klarte ikke hente pokemon", error);
   }
@@ -202,20 +207,37 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   card.style.backgroundColor = typeColor;
   card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
-//using name instead of id to fix the delete function: 
-function deletePokemonData(pokemonName) {
+
+async function fetchReplacementPokemon() { //Made a function that only fetches one pokemon when you delete one
+  try {
+const pokemonResponse = await fetch("https://pokeapi.co/api/v2/pokemon/"); //fetching a new one from api 
+const data = await pokemonResponse.json();
+const randomPokemon = Math.floor(Math.random() * data.count) + 1; //keeping it random 
+const randomPokemonUrl = `https://pokeapi.co/api/v2/pokemon/${randomPokemon}`;
+const fetchedSinglePokemonResponse = await fetch(randomPokemonUrl);
+const fetchedPokemonData = await fetchedSinglePokemonResponse.json();
+
+pokemonDataArray.push(fetchedPokemonData); //this array stores all the fetched pokemon
+displayPokemon(fetchedPokemonData); //caling display function to see it on the page
+
+} catch (error) {
+  console.error("Klarte ikke hente og vise pokemon" ,error);
+}
+}
+//renamed constants, I'm struggeling between keeping it "professional" and how I prefer to write (how do people just know what to name anything?)
+function deletePokemonData(pokemonName) { //function to delete the pokemon from page/list/localStorage
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
     const updatedPokemon = savedPokemon.filter(pokemon => pokemon.name !== pokemonName);
-    localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
+    localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon)); //removes my pokemon from my localStorage
   
-    const cardToRemove = document.querySelector(`.pokemon-card[data-name="${pokemonName}"]`);
-    cardToRemove && cardToRemove.remove();
+    const removePokemonCard = document.querySelector(`.pokemon-card[data-name="${pokemonName}"]`); 
+    removePokemonCard && removePokemonCard.remove(); //removing the pokemon card
   
-    const listItemToRemove = document.getElementById("favourite-pokemon-list").querySelector(`li[data-name="${pokemonName}"]`);
-    listItemToRemove && listItemToRemove.remove();
+    const removePokemonFromList = document.getElementById("favourite-pokemon-list").querySelector(`li[data-name="${pokemonName}"]`); 
+    removePokemonFromList && removePokemonFromList.remove(); //removing from list
   
-    fetchAndDisplayPokemon();
+    fetchReplacementPokemon(); //instead of calling fetchAndDisplay we call a function that only replaces the one you just deleted
   } catch (error) {
     console.error("Her gikk noe galt", error);
   }
@@ -281,7 +303,7 @@ function showSavedPokemonList() { //pokemon gets added to my favourite pokemon l
     favouriteListContainer.appendChild(listItem);
   });
 }
-//removing the id for now...
+
 function savePokemonData(pokemonName, pokemonType) { //saving pokemon to local storage and list
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
