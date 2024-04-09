@@ -186,7 +186,7 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   deleteBtn.addEventListener("click", () => deletePokemonData(name));
 
   card.appendChild(nameElement);  //make sure everything is appended so I can see it
-  card.appendChild(typeElement);
+  card.appendChild(typeElement); //tried to write it in shorthand but it started performing weirdly 
   card.appendChild(imageElement);
   card.appendChild(editBtn);
   card.appendChild(saveBtn);
@@ -236,46 +236,65 @@ function deletePokemonData(pokemonName) { //function to delete the pokemon from 
   
     const removePokemonFromList = document.getElementById("favourite-pokemon-list").querySelector(`li[data-name="${pokemonName}"]`); 
     removePokemonFromList && removePokemonFromList.remove(); //removing from list
-  
+
     fetchReplacementPokemon(); //instead of calling fetchAndDisplay we call a function that only replaces the one you just deleted
   } catch (error) {
     console.error("Her gikk noe galt", error);
   }
 }
-//still doesen't affect the name in local or list, also need the card to change color...
-function editPokemonData(nameElement, typeElement) {
+//worked on this today and now there are buggs in the save function again...why?:
+//need to limit what you can write in as type to...an alert or something "this type doesn't exist"
+function editPokemonData(nameElement, typeElement) { //function to edit the pokemon name and type
+  try {
   const newName = prompt("Skriv inn nytt navn:");
   const newType = prompt("Skriv inn ny type:");
 
   if (newName && newType) {
+    const originalName = nameElement.textContent;
+    const originalType = typeElement.textContent.replace("Type: ", "");
+
     nameElement.textContent = newName;
     typeElement.textContent = `Type: ${newType}`;
-
-    const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
-    const updatedPokemon = savedPokemon.map(pokemon => {
-      if (pokemon.name === nameElement.textContent && pokemon.type === typeElement.textContent) {
-        return { name: newName, type: newType };
-      } else {
-        return pokemon;
-      }
-    });
-
-    localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
-
-    const listItem = nameElement.closest("li");
-    if (listItem) {
-      listItem.textContent = `${newName} - ${newType}`;
-      listItem.dataset.name = newName.toLowerCase();
-      listItem.dataset.type = newType.toLowerCase();
-    }
+  
+    const newTypeColor = typeColors [newType.toLowerCase()]; // at least this one works...changes the color of the card
+    const card = nameElement.closest(".pokemon-card");
+    card.style.backgroundColor = newTypeColor;
+//these two both give me what I want but they both have buggs...
+    //savePokemonData(newName, newType, true, originalName, originalType); // this lets me edit and store new names, but they stay in storage after I delete
+    saveEditedPokemonData(newName, newType, originalName, originalType); //this lets me edit and store new names, but they stay in storage after I delete
+  }
+  } catch(error) {
+console.error("noe gikk galt i edit", error);
   }
 }
+//Do I even need this? should just have one edit function and then save everything to savePokemonData...
+function saveEditedPokemonData(originalName, originalType, newName, newType) {
+  try{
+  const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
+  const updatedPokemon = savedPokemon.map(pokemon => {
+
+    if (pokemon.name === originalName && pokemon.type === originalType) {
+     pokemon.name = newName;
+     pokemon.type = newType;
+    } else {
+      return pokemon;
+    }
+  });
+
+  localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
+
+showSavedPokemonList();
+  } catch (error) {
+    console.error("klarte ikke oppdatere nytt pokemonnavn eller ny type");
+  }
+}
+
 
 function showSavedPokemonList() { //pokemon gets added to my favourite pokemon list
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
   const favouriteListContainer = document.getElementById("favourite-pokemon-list");
 
-  favouriteListContainer.innerHTML = ""; //emptying the list
+  favouriteListContainer.innerHTML= ""; //empties the list
 
   savedPokemon.forEach((pokemon) => {
     const name = pokemon.name;
@@ -303,7 +322,7 @@ function showSavedPokemonList() { //pokemon gets added to my favourite pokemon l
     favouriteListContainer.appendChild(listItem);
   });
 }
-
+//This needs alterations:
 function savePokemonData(pokemonName, pokemonType) { //saving pokemon to local storage and list
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
@@ -313,7 +332,7 @@ function savePokemonData(pokemonName, pokemonType) { //saving pokemon to local s
       alert(`${pokemonName} er allerede lagret`);
       return;
     }
-//i use newName and newType in the edit function, should I implement that in here? 
+//I use newName and newType in the edit function, should I implement that in here? 
     savedPokemon.push({ name: pokemonName, type: pokemonType });
 
     localStorage.setItem("savedPokemon", JSON.stringify(savedPokemon));
