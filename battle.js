@@ -1,6 +1,6 @@
 //based on a previous asignment, will have to alter the logic when I start testing it...
 //I had such big ambitions for this, using the poke api, but after my harddrive crash I am playing it safe with things I already know
-document.addEventListener("DOMContentLoaded", function() {
+
 let myPokemonArray = [
     {
         id: 0,
@@ -21,8 +21,8 @@ let myPokemonArray = [
     {
         id: 2,
         name: "Ditto",
-        maxHP: 20,  
-        currentHP: 20,
+        maxHP: 25,  
+        currentHP: 25,
         damage: 10,
         alive: true
     },
@@ -60,15 +60,27 @@ async function getRandomFoxImage() {
         console.error("Åh nei, noen har stjålet premien din!", error);
     }
 }
-//your price for winning (loads slowly):
-function displayFoxImage(imageUrl) {
+//complimentary fox for the winner!
+async function displayFoxImage(imageUrl) {
+    try {
+    const foxContainer = document.createElement(`div`);
+    foxContainer.style.display = `flex`;
+    foxContainer.style.justifyContent = `center`;
+    foxContainer.style.alignItems = `center`;
+    foxContainer.style.height = `60vh`; 
+
     const foxImage = document.createElement(`img`);
     foxImage.src = imageUrl;
     foxImage.alt = `Random Fox`;
-    //need to fix the possitioning and adjust the size more...
-    foxImage.style.width = `500px`;
-    //is there a better way to do this? a container or something?
-    document.body.appendChild(foxImage);
+    foxImage.style.width = `300px`;
+    foxImage.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
+    foxImage.style.borderRadius = "10px";
+
+    foxContainer.appendChild(foxImage);
+    document.body.appendChild(foxContainer);
+} catch(error) {
+console.error("bildet vil ikke laste inn", error);
+}
 }
 
 const myPokemon = document.querySelectorAll(".pokemon");
@@ -122,7 +134,7 @@ if (randomPokemon.currentHP <= 0) { //did the pokemon faint?
 }
 }
 
-//pokemonBoss healthbar...needs different logic based on the css!
+//pokemonBoss healthbar...
 function showPokemonBossHelth() {
 const currentBossHP = pokemonBoss.currentHP;
 const maxPokemonBossHP = pokemonBoss.maxHP;
@@ -131,6 +143,9 @@ const pokemonBossHealthBar = document.querySelector(".pokemonboss-health");
 const percentage = (currentBossHP / maxPokemonBossHP) * 100;
 pokemonBossHealthBar.style.width = percentage + "%";
 pokemonBoss.currentHP = Math.max(0, pokemonBoss.currentHP);
+//added this: 
+const pokemonBossHealthTxt = document.querySelector(".pokemonboss-health-txt");
+pokemonBossHealthTxt.innerHTML = `${currentBossHP}/${maxPokemonBossHP}`;
 
 bossFaint();
 }
@@ -142,7 +157,7 @@ function bossFaint () { //for when you defeat the boss
             pokemonBossImage.remove();
 
             setTimeout(function () {
-                alert("Gratulerer! Du har beseiret Totodile og vunnet spillet!");
+                alert("Gratulerer! Du har beseiret Totodile og vunnet spillet! Premien din er denne fine reven:");
                 getRandomFoxImage();
             }, 250);
         }
@@ -180,8 +195,9 @@ function pokemonFainted () { //for when your team gets wrecked
         }
     }
 }
-
+//want to make the hp text react aswell....
 function updatePokemonHealthBars() {
+
     myPokemonArray.forEach((pokemon) => {
         const healthBarContainer = document.querySelector(`.healthbar.${pokemon.name.toLowerCase()}-health`);
 
@@ -193,9 +209,8 @@ function updatePokemonHealthBars() {
             if (pokemon.currentHP > 0) {
                 percentage = (pokemon.currentHP / pokemon.maxHP) * containerWidth;
             }
-
             healthBarContainer.style.width = percentage + "px";
-
+         
             if (pokemon.currentHP <= 0) {
                 healthBarContainer.style.width = "0px";
             }
@@ -215,4 +230,3 @@ if(allYourPokemonFainted.length === 3 && BossStillConcious) {
     }, 250);
 }
 }
-});
