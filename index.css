@@ -1,5 +1,8 @@
 body {
-  background-color: rgb(157, 232, 241);
+  background: linear-gradient(180deg, #22c1c3, #fdbb2d);
+background-attachment: fixed;
+  height: 100%;
+  margin: 0;
 }
 /*tried to find the most pokelike font I could*/
 h1 {

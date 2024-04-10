@@ -367,5 +367,3 @@ function savePokemonData(pokemonName, pokemonType) { //saving pokemon to local s
 
 fetchAndDisplayPokemon();
 showSavedPokemonList();
-
-
