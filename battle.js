@@ -1,5 +1,6 @@
 //based on a previous asignment, will have to alter the logic when I start testing it...
 //I had such big ambitions for this, using the poke api, but after my harddrive crash I am playing it safe with things I already know
+document.addEventListener("DOMContentLoaded", function() {
 let myPokemonArray = [
     {
         id: 0,
@@ -34,6 +35,41 @@ let pokemonBoss = {
     damage: 20,
     alive: true,
 };
+//fetching your punishment for loosing the game: 
+async function getChuckNorrisJoke() {
+    try {
+        const response = await fetch(`https://api.chucknorris.io/jokes/random`);
+        const data = await response.json();
+        displayJoke(data.value);
+    } catch (error) {
+        console.error("Oi, du slapp vist unna straffen din for denne gang", error);
+    }
+}
+
+function displayJoke(joke) {
+    
+    alert("Du har tapt, og vil nå bli straffet med en dårlig Chuck Norris vits: " + joke);
+}
+
+async function getRandomFoxImage() {
+    try {
+        const response = await fetch(`https://randomfox.ca/floof/`);
+        const data = await response.json();
+        displayFoxImage(data.image);
+    } catch (error) {
+        console.error("Åh nei, noen har stjålet premien din!", error);
+    }
+}
+//your price for winning (loads slowly):
+function displayFoxImage(imageUrl) {
+    const foxImage = document.createElement(`img`);
+    foxImage.src = imageUrl;
+    foxImage.alt = `Random Fox`;
+    //need to fix the possitioning and adjust the size more...
+    foxImage.style.width = `500px`;
+    //is there a better way to do this? a container or something?
+    document.body.appendChild(foxImage);
+}
 
 const myPokemon = document.querySelectorAll(".pokemon");
 myPokemon.forEach((pokemon,i) => {
@@ -103,12 +139,11 @@ function bossFaint () { //for when you defeat the boss
     if(pokemonBoss.currentHP <= 0) {
         const pokemonBossImage = document.querySelector(".boss");
         if(pokemonBossImage) {
-            let pokemonBossTotodile = document.querySelector(".img-container.boss-container");
-            
             pokemonBossImage.remove();
 
             setTimeout(function () {
                 alert("Gratulerer! Du har beseiret Totodile og vunnet spillet!");
+                getRandomFoxImage();
             }, 250);
         }
     }
@@ -175,6 +210,9 @@ function defeat () {
 if(allYourPokemonFainted.length === 3 && BossStillConcious) {
     setTimeout(function () {
         alert("Du har tapt pokemon-kampen!");
+        //your punishment for loosing:
+        getChuckNorrisJoke();
     }, 250);
 }
 }
+});

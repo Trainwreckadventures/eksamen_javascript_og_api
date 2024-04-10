@@ -4,7 +4,10 @@ fra 02.04.24 til 12.04.24
 oppgave 1 Pokemon index: 3 filer (html, js, css).
 oppgave 2 Pokemon battle: 3 filer (html, js, css).
 
-API used: https://pokeapi.co/
+API used: 
+https://pokeapi.co/
+https://api.chucknorris.io/
+https://randomfox.ca/
 
 Pokemon type colors:
 
