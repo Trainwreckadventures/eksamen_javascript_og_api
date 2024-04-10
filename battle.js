@@ -146,26 +146,23 @@ function pokemonFainted () { //for when your team gets wrecked
     }
 }
 
-function updatePokemonHealthBars() { //needs new logic based on the new css!
+function updatePokemonHealthBars() {
     myPokemonArray.forEach((pokemon) => {
-        const healthBar = document.querySelector(`.healthbar.${pokemon.name.toLowerCase()}-health`);
+        const healthBarContainer = document.querySelector(`.healthbar.${pokemon.name.toLowerCase()}-health`);
 
-        if (healthBar) {
-            const containerWidth = healthBar.parentElement.offsetWidth;
+        if (healthBarContainer) {
+           
+            const containerWidth = healthBarContainer.offsetWidth;
             let percentage = 0;
 
             if (pokemon.currentHP > 0) {
                 percentage = (pokemon.currentHP / pokemon.maxHP) * containerWidth;
             }
 
-            healthBar.style.width = percentage + "px";
+            healthBarContainer.style.width = percentage + "px";
 
             if (pokemon.currentHP <= 0) {
-                healthBar.style.width = "0px";
-              
-                setTimeout(() => {
-                    alert(`${pokemon.name} er ute av kampen!`);
-                }, 250);
+                healthBarContainer.style.width = "0px";
             }
         }
     });
