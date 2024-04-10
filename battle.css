@@ -13,20 +13,24 @@ p {
 
 .pokemonboss-health-container{
     text-align: center;
+    font-weight: bold;
     position: absolute;
      width: 200px;
     height: 50px;
     top: 15%;
     right: 27%;
-    background-color: rgb(45, 253, 191) ;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
     border-radius: 10px;
+    z-index: 2;
     }
 
+/*affects totodile to:*/
     .healthbar {
         position: absolute;
         height: 50px;
-        background-color: rgb(45, 253, 191) ;
+        background-color: rgba(59, 250, 193, 0.39);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        border-radius: 10px;
+        z-index: 1;
       }
 
 .bulbasaur-health {
@@ -41,24 +45,14 @@ border-radius: 10px;
     position: absolute;
     top: 63%;
     right: 64%; 
+    z-index: 2;
 }
 
 #bulbasaur-health-txt {
     position: absolute;
     top: 65%; 
     right: 65%; 
-}
-
-#squirtle-name-txt {
-    position: absolute;
-    top: 57%;
-    right: 49%; 
-}
-
-#squirtle-health-txt {
-    position: absolute;
-    top: 59%; 
-    right: 50%; 
+    z-index: 2;
 }
 
 .squirtle-health {
@@ -69,16 +63,18 @@ border-radius: 10px;
      border-radius: 10px;
 }
 
-#ditto-name-txt {
+#squirtle-name-txt {
     position: absolute;
-    top: 60%;
-    right: 80%; 
+    top: 57%;
+    right: 49%; 
+    z-index: 2;
 }
 
-#ditto-health-txt {
+#squirtle-health-txt {
     position: absolute;
-    top: 62%; 
-    right: 80%; 
+    top: 59%; 
+    right: 50%; 
+    z-index: 2;
 }
 
 .ditto-health {
@@ -89,8 +85,18 @@ border-radius: 10px;
      border-radius: 10px;
 }
 
-.totodile-health {
-    width: 300;
+#ditto-name-txt {
+    position: absolute;
+    top: 60%;
+    right: 80%; 
+    z-index: 2;
+}
+
+#ditto-health-txt {
+    position: absolute;
+    top: 62%; 
+    right: 80%; 
+    z-index: 2;
 }
 
 .img-container {
@@ -133,5 +139,5 @@ border-radius: 10px;
     bottom: 10%;
     right: 20%; 
     left: auto; 
-    z-index: 1;
+    z-index: 2;
 }
