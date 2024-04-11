@@ -1,5 +1,5 @@
 body {
-  background: linear-gradient(180deg, #22c1c3, #fdbb2d);
+  background: linear-gradient(180deg, #22c1c3, #fdbb2d); /*got some help from css gradient on this one*/
 background-attachment: fixed;
   height: 100%;
   margin: 0;
@@ -27,7 +27,7 @@ h1 {
   font-family: "Courier New", Courier, monospace;
   font-weight: bold;
   border-radius: 12px;
-  border: 1.5px solid #000;
+  border: 1.5px solid rgb(207, 255, 253);
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
   padding: 10px 20px;
   background: rgb(124, 215, 230);
@@ -45,7 +45,7 @@ h1 {
   font-family: "Courier New", Courier, monospace;
   font-weight: bold;
   border-radius: 12px;
-  border: 1.5px solid #000;
+  border: 1.5px solid rgb(124, 215, 230);
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
   padding: 8px 18px; 
   background: rgb(124, 215, 230);
