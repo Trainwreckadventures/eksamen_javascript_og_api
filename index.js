@@ -2,7 +2,7 @@
 //saving project locally, on a usb stick and to github (because my harddrive got corrupted and it affected the entire project).
 //keep it simple! there is a lot of text and I would love to get better at writing shorter (including shorthand) and more functional code. 
 
-const typeColors = { 
+const typeColors = {  //the 18 typecolors for the pokemon 
   bug: "rgb(148, 188, 74)",
   dark: "rgb(115, 108, 117)",
   dragon: "rgb(106, 123, 175)",
@@ -62,26 +62,6 @@ function showAllTypes() {   //the function that lets you see all the types you h
   })
 }
 
-const makeYourOwnBtn = document.querySelector("#make-your-own-btn");
-makeYourOwnBtn.addEventListener("click", makeYourOwnPokemon);
-//this is supposed to show up as a new card with a default picture, how?!:
-function makeYourOwnPokemon() {
-  try {
-  const myName = prompt("Skriv inn navnet på din pokemon:");
-  const myType = prompt("Skriv inn typen til din pokemon:");
-
-  if (myName && myType) {
-    const customPokemon = {name: myName, type: myType};
-    pokemonDataArray.push(customPokemon);
-    displayPokemon(customPokemon);
-    savePokemonData(myName, myType);
-  }
-} catch (error) {
-  alert("Oida, utvikleren har vist ikke blitt ferdig med denne funksjonen");
-  console.error("Noe gikk galt i makeYourOwnPokemon", error);
-}
-}
-
 let pokemonDataArray = []; //made an array for the fetched pokemon
 
 async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
@@ -131,20 +111,17 @@ async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
         break;  //breaks the while loop
       } //I had to get chat gpt to explain the consept of pagination to me as if I was a child...
     }
-    pokemonDataArray.forEach((pokemonData, index) => {
+    pokemonDataArray.forEach((pokemonData, index) => { 
       displayPokemon(pokemonData, index);
-    })
+    });
   } catch (error) {
-    console.error("Klarte ikke hente pokemon", error);
+    console.error("Noe gikk galt i fetchAndDisplayPokemon", error);
   }
 }
 
 function displayPokemon(data) { //I have done some of the styling in js
- 
   const name = data.name;
-  
   const type = data.types[0].type.name;
-  
   const typeColor = typeColors[type];
   const imageUrl = data.sprites.front_default; //images from pokeapi are called sprites
 
@@ -156,6 +133,7 @@ function displayPokemon(data) { //I have done some of the styling in js
   card.classList.add("pokemon-card");
   card.dataset.name = name.toLowerCase();
   card.dataset.type = type.toLowerCase();
+  card.style.backgroundColor = typeColor;
 
   const nameElement = document.createElement("h3"); //name text
   nameElement.textContent = name;
@@ -177,18 +155,18 @@ function displayPokemon(data) { //I have done some of the styling in js
   imageElement.style.marginTop = "30px";
   imageElement.style.marginBottom = "50px";
 
-  const editBtn = document.createElement("button"); //edit button:
-  editBtn.textContent = "Edit";
-  editBtn.classList.add("edit-btn", "cardBtn");
-  editBtn.style.marginLeft = "40px";
-  editBtn.addEventListener("click", () => {
-    const card = editBtn.closest(".pokemon-card");
+  const makeYourOwnBtnt = document.createElement("button"); //make your own pokemon btn
+  makeYourOwnBtnt.textContent = "Custom";
+  makeYourOwnBtnt.classList.add("make-your-own-btn", "cardBtn");
+  makeYourOwnBtnt.style.marginLeft = "30px";
+  makeYourOwnBtnt.addEventListener("click", () => {
+    const card = makeYourOwnBtnt.closest(".pokemon-card");
     const nameElement = card.querySelector("h3");
     const typeElement = card.querySelector("p");
-    editPokemonData(nameElement, typeElement);
+    makeYourOwn(nameElement, typeElement); 
   });
 
-  const saveBtn = document.createElement("button"); //save button:
+  const saveBtn = document.createElement("button"); //save btn
   saveBtn.textContent = "Save";
   saveBtn.classList.add("save-btn", "cardBtn");
   saveBtn.style.marginLeft = "30px";
@@ -203,7 +181,7 @@ function displayPokemon(data) { //I have done some of the styling in js
   card.appendChild(nameElement);  //make sure everything is appended so I can see it
   card.appendChild(typeElement); //tried to write it in shorthand but it started performing weirdly 
   card.appendChild(imageElement);
-  card.appendChild(editBtn);
+  card.appendChild(makeYourOwnBtnt);
   card.appendChild(saveBtn);
   card.appendChild(deleteBtn);
 
@@ -224,22 +202,27 @@ function displayPokemon(data) { //I have done some of the styling in js
   card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
 
-async function fetchReplacementPokemon() { //Made a function that only fetches one pokemon when you delete one
+async function fetchReplacementPokemon() { //getting 1 random pokemon from pokeapi
   try {
-const pokemonResponse = await fetch("https://pokeapi.co/api/v2/pokemon/"); //fetching a new one from api 
-const data = await pokemonResponse.json();
-const randomPokemon = Math.floor(Math.random() * data.count) + 1; //keeping it random 
-const randomPokemonUrl = `https://pokeapi.co/api/v2/pokemon/${randomPokemon}`;
-const fetchedSinglePokemonResponse = await fetch(randomPokemonUrl);
-const fetchedPokemonData = await fetchedSinglePokemonResponse.json();
+    const pokemonResponse = await fetch("https://pokeapi.co/api/v2/pokemon/");
+    const data = await pokemonResponse.json();
+    const randomPokemon = Math.floor(Math.random() * data.count) + 1;
+    const randomPokemonUrl = `https://pokeapi.co/api/v2/pokemon/${randomPokemon}`;
+    const fetchedSinglePokemonResponse = await fetch(randomPokemonUrl);
+    const fetchedPokemonData = await fetchedSinglePokemonResponse.json();
 
-pokemonDataArray.push(fetchedPokemonData); //this array stores all the fetched pokemon
-displayPokemon(fetchedPokemonData); //caling display function to see it on the page
+    pokemonDataArray.push(fetchedPokemonData);
 
-} catch (error) {
-  console.error("Klarte ikke hente og vise pokemon" ,error);
+    displayPokemon(fetchedPokemonData);
+
+    const card = document.querySelector(`[data-name="${fetchedPokemonData.name.toLowerCase()}"]`);
+    const deleteBtn = card.querySelector(".delete-btn");
+    deleteBtn.addEventListener("click", () => deletePokemonData(fetchedPokemonData.name));
+  } catch (error) {
+    console.error("Noe gikk galt i fetchReplacementPokemon", error);
+  }
 }
-}
+
 
 function deletePokemonData(pokemonName) { //function to delete the pokemon from page/list/localStorage
   try {
@@ -259,38 +242,71 @@ function deletePokemonData(pokemonName) { //function to delete the pokemon from 
   }
 }
 
-//need to limit what you can write in as type to...an alert or something "this type doesn't exist"
-//Need to limit this so you can't add another pokemon when you edit, it should just update the one you have...
-function editPokemonData(nameElement, typeElement) { //function to edit the pokemon name and type
+let defaultPokemonImg = false;
+//this used to be the edit functon for the card, but I didn't know how to impliment make your own pokemon any other way, and I am running out of time!
+function makeYourOwn(nameElement, typeElement) {
   try {
-  const newName = prompt("Skriv inn nytt navn:");
-  const newType = prompt("Skriv inn ny type:");
+    const newName = prompt("Enter a new name:");
+    const newType = prompt("Enter a new type:");
 
-  if (newName && newType) {
-    const originalName = nameElement.textContent;
-    const originalType = typeElement.textContent.replace("Type: ", "");
+    if (newName && newType) {
+      const originalName = nameElement.textContent;
+      const originalType = typeElement.textContent.replace("Type: ", "");
 
-    nameElement.textContent = newName;
-    typeElement.textContent = `Type: ${newType}`;
-  
-    const newTypeColor = typeColors [newType.toLowerCase()]; // at least this one works...changes the color of the card
-    const card = nameElement.closest(".pokemon-card");
-    card.style.backgroundColor = newTypeColor;
+      nameElement.textContent = newName;
+      typeElement.textContent = `Type: ${newType}`;
 
-    savePokemonData(newName, newType, true, originalName, originalType); 
-    showSavedPokemonList();
-   
-  }
+      const newTypeColor = typeColors[newType.toLowerCase()];
+      const card = nameElement.closest(".pokemon-card");
+      card.style.backgroundColor = newTypeColor;
+
+      savePokemonData(newName, newType, true, originalName, originalType);
+
+      const imageElement = card.querySelector("img");
+
+      if (!card.dataset.customized) { //manually disabled these because of the infinate save bug, if it is already customized the buttons will no longer work.
+        const defaultImg = document.querySelector(".default-img");
+        imageElement.src = defaultImg.src;
+        card.dataset.customized = "true"; 
+        const makeYourOwnBtn = card.querySelector(".make-your-own-btn");
+        makeYourOwnBtn.disabled = true;
+        const saveBtn = card.querySelector(".save-btn");
+        saveBtn.disabled = true;
+
+        card.dataset.name = newName.toLowerCase();
+        card.dataset.type = newType.toLowerCase();
+
+        const deleteBtn = card.querySelector(".delete-btn");
+      deleteBtn.addEventListener("click", () => deletePokemonData(newName));
+      }
+    }
   } catch(error) {
-console.error("noe gikk galt i edit", error);
+    console.error("Noe gikk galt i makeYourOwn funksjonen", error);
   }
 }
 
-function showSavedPokemonList() { //pokemon gets added to my favourite pokemon list
+function editPokemonListAndStorage(pokemonName, newName, newType) { //function for editing pokemon that are saved to list/storage
+  const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
+  
+  const index = savedPokemon.findIndex(pokemon => pokemon.name === pokemonName);
+  
+  if (index !== -1) {
+    savedPokemon[index].name = newName;
+    savedPokemon[index].type = newType;
+    
+    localStorage.setItem("savedPokemon", JSON.stringify(savedPokemon));
+    
+    showSavedPokemonList();
+  } else {
+    console.error("Fant ikke en pokemon å edite");
+  }
+}
+
+function showSavedPokemonList() { //this is what shows up in the favourite list container:
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
   const favouriteListContainer = document.getElementById("favourite-pokemon-list");
 
-  favouriteListContainer.innerHTML= ""; //empties the list
+  favouriteListContainer.innerHTML = ""; //empties favourite list
 
   savedPokemon.forEach((pokemon) => {
     const name = pokemon.name;
@@ -313,26 +329,49 @@ function showSavedPokemonList() { //pokemon gets added to my favourite pokemon l
 
     const typeColor = typeColors[type.toLowerCase()];
     listItem.style.backgroundColor = typeColor;
-//made a delete-button incase you refresh the page before you delete the pokemon card: 
-    const deleteBtn = document.createElement("button");
+    listItem.style.marginRight ="35px";
+    
+    const deleteBtn = document.createElement("button"); //delete directly from list
     deleteBtn.textContent = "Delete";
+    deleteBtn.classList.add("list-delete-btn");
+    deleteBtn.style.marginRight = "20px"
     deleteBtn.addEventListener("click", () => {
       deletePokemonFromListAndLocal(pokemon.name);
-    })
-//styling the delete button (should probably add edit to...):
-    deleteBtn.style.backgroundColor = "rgb(124, 215, 230)";
-    deleteBtn.style.color = "black";
-    deleteBtn.style.border = "none";
-    deleteBtn.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
-    deleteBtn.style.borderRadius = "5px";
-    deleteBtn.style.padding = "5px";
-    deleteBtn.style.cursor = "pointer";
+    });
+    styleButton(deleteBtn);
+
+    const editBtn = document.createElement("button"); //edit directly in list
+editBtn.textContent = "Edit";
+editBtn.classList.add("list-edit-btn");
+editBtn.addEventListener("click", () => {
+  const newName = prompt("Enter new name:");
+  const newType = prompt("Enter new type:");
+  if (newName && newType) {
+    editPokemonListAndStorage(pokemon.name,newName,newType);
+  } else {
+    console.error("Noe gikk galt i showSavedPokemonList", error);
+  }
+});
+    styleButton(editBtn);
 
     listItem.appendChild(textContainer);
     listItem.appendChild(deleteBtn);
+    listItem.appendChild(editBtn);
     favouriteListContainer.appendChild(listItem);
   });
 }
+
+function styleButton(button) { //look at me using a function that can apply for more than one thing...
+  button.style.backgroundColor = "rgb(124, 215, 230)";
+  button.style.color = "black";
+  button.style.border = "none";
+  button.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
+  button.style.borderRadius = "5px";
+  button.style.padding = "5px";
+  button.style.cursor = "pointer";
+  
+}
+
 //covering my base since I wasn't that smart with my code: 
 function deletePokemonFromListAndLocal(pokemonName) {
   try {
@@ -347,13 +386,18 @@ function deletePokemonFromListAndLocal(pokemonName) {
     console.error("Klarte ikke slette pokemon", error);
   }
 }
-
-function savePokemonData(pokemonName, pokemonType) { //saving pokemon to my localStorage and favourite-list
+//now I can finally see the last favorit pokemon with styling....
+function savePokemonData(pokemonName, pokemonType) {
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
+    if (savedPokemon.length >= 5) {
+      alert("Maksgrense er nådd, du kan ikke lagre flere pokemon.");
+      return; 
+    }
+
     const existingPokemon = savedPokemon.find(pokemon => pokemon.name === pokemonName && pokemon.type === pokemonType);
 
-    if (existingPokemon) { // this one only works when you haven't altered the pokemon
+    if (existingPokemon) {
       alert(`${pokemonName} er allerede lagret`);
       return;
     }
@@ -374,17 +418,12 @@ function savePokemonData(pokemonName, pokemonType) { //saving pokemon to my loca
       favouriteListContainer.appendChild(listItem);
     }
 
-    if (savedPokemon.length >= 5) {
-      alert(
-        "Maksgrense er nådd, du må slette en lagret pokemon for å få plass til en ny"
-      );
-      return;
-    }
     showSavedPokemonList();
   } catch (error) {
     console.error("Klarte ikke lagre pokemon til favorittliste eller localStorage", error);
   }
 }
+
 
 fetchAndDisplayPokemon();
 showSavedPokemonList();
