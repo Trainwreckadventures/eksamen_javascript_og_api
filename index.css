@@ -69,7 +69,7 @@ h1 {
   position: absolute;
   top: 20%;
   right: 2%;
-  height: 600px;
+  height: 650px;
   width: 450px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
   border-radius: 50px;
@@ -80,3 +80,4 @@ h1 {
   font-family: "Courier New", Courier, monospace;
   text-align: center;
 }
+
