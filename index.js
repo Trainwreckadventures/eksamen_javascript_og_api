@@ -1,7 +1,8 @@
-//things to do:
-// you need a default picture for the like list,
-//change the name of edited pokemon in list and localStorage, make sure the color change with the new type aswell.
-const typeColors = {
+//Things I would have done differently: optimization, smaller functions that I can reuse. Understanding the big picture before I start, understanding how these functions affect eachother.
+//saving project locally, on a usb stick and to github (because my harddrive got corrupted and it affected the entire project).
+//keep it simple! there is a lot of text and I would love to get better at writing shorter (including shorthand) and more functional code. 
+
+const typeColors = { 
   bug: "rgb(148, 188, 74)",
   dark: "rgb(115, 108, 117)",
   dragon: "rgb(106, 123, 175)",
@@ -23,7 +24,7 @@ const typeColors = {
   none: "rgb(124, 215, 230)"
 };
 
-function applyCommonStyles(element) { // I used these tyles on more than one thing so I am trying to optimize
+function applyCommonStyles(element) { // I used these styles on more than one thing so I am trying to optimize
   element.style.textAlign = "center";
   element.style.fontFamily = "Courier New, Courier, monospace";
   element.style.fontWeight = "bold";
@@ -63,18 +64,26 @@ function showAllTypes() {   //the function that lets you see all the types you h
 
 const makeYourOwnBtn = document.querySelector("#make-your-own-btn");
 makeYourOwnBtn.addEventListener("click", makeYourOwnPokemon);
-//needs more work!:
+//this is supposed to show up as a new card with a default picture, how?!:
 function makeYourOwnPokemon() {
+  try {
   const myName = prompt("Skriv inn navnet på din pokemon:");
   const myType = prompt("Skriv inn typen til din pokemon:");
 
   if (myName && myType) {
-    displayPokemon({ name: myName, types: [{ type: { name: myType } }] });
+    const customPokemon = {name: myName, type: myType};
+    pokemonDataArray.push(customPokemon);
+    displayPokemon(customPokemon);
+    savePokemonData(myName, myType);
   }
+} catch (error) {
+  alert("Oida, utvikleren har vist ikke blitt ferdig med denne funksjonen");
+  console.error("Noe gikk galt i makeYourOwnPokemon", error);
 }
-//made an array for the pokemon:
-let pokemonDataArray = [];
-//fixed it so it fetches 50 and not 49 pkm:
+}
+
+let pokemonDataArray = []; //made an array for the fetched pokemon
+
 async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
   try {
     let pokemonID = 0; // giving the pokemon individual id as they load
@@ -130,13 +139,19 @@ async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
   }
 }
 
-function displayPokemon(data) { //normaly my pref. is to do styling in css, but I wanted to have a go at styling in js to
+function displayPokemon(data) { //I have done some of the styling in js
+ 
   const name = data.name;
+  
   const type = data.types[0].type.name;
+  
   const typeColor = typeColors[type];
-  const imageUrl = data.sprites.front_default; //images are called sprites in the pokeapi, and they have multiple images to choose from
+  const imageUrl = data.sprites.front_default; //images from pokeapi are called sprites
 
   const cardContainer = document.querySelector(".card-container");
+  const cardWrapper = document.createElement("div");
+  cardWrapper.classList.add("card-wrapper");
+  
   const card = document.createElement("div"); //creating elements directly in js
   card.classList.add("pokemon-card");
   card.dataset.name = name.toLowerCase();
@@ -192,7 +207,8 @@ function displayPokemon(data) { //normaly my pref. is to do styling in css, but 
   card.appendChild(saveBtn);
   card.appendChild(deleteBtn);
 
-  cardContainer.appendChild(card);
+  cardWrapper.appendChild(card);
+  cardContainer.appendChild(cardWrapper);
 
   cardContainer.style.display = "flex"; //styling for my pokemon cards
   cardContainer.style.flexDirection = "column";
@@ -224,7 +240,7 @@ displayPokemon(fetchedPokemonData); //caling display function to see it on the p
   console.error("Klarte ikke hente og vise pokemon" ,error);
 }
 }
-//renamed constants, I'm struggeling between keeping it "professional" and how I prefer to write (how do people just know what to name anything?)
+
 function deletePokemonData(pokemonName) { //function to delete the pokemon from page/list/localStorage
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
@@ -242,8 +258,9 @@ function deletePokemonData(pokemonName) { //function to delete the pokemon from 
     console.error("Her gikk noe galt", error);
   }
 }
-//worked on this today and now there are buggs in the save function again...why?:
+
 //need to limit what you can write in as type to...an alert or something "this type doesn't exist"
+//Need to limit this so you can't add another pokemon when you edit, it should just update the one you have...
 function editPokemonData(nameElement, typeElement) { //function to edit the pokemon name and type
   try {
   const newName = prompt("Skriv inn nytt navn:");
@@ -259,39 +276,13 @@ function editPokemonData(nameElement, typeElement) { //function to edit the poke
     const newTypeColor = typeColors [newType.toLowerCase()]; // at least this one works...changes the color of the card
     const card = nameElement.closest(".pokemon-card");
     card.style.backgroundColor = newTypeColor;
-//these two both give me what I want but they both have buggs...
-    //savePokemonData(newName, newType, true, originalName, originalType); // this lets me edit and store new names, but they stay in storage after I delete
-    saveEditedPokemonData(newName, newType, originalName, originalType); //this lets me edit and store new names, but they stay in storage after I delete
+
+    savePokemonData(newName, newType, true, originalName, originalType); 
+    showSavedPokemonList();
+   
   }
   } catch(error) {
 console.error("noe gikk galt i edit", error);
-  }
-}
-//Do I even need this? should just have one edit function and then save everything to savePokemonData...
-function saveEditedPokemonData(originalName, originalType, newName, newType) {
-  try{
-  const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
-  const updatedPokemon = savedPokemon.map(pokemon => {
-
-    if (pokemon.name === originalName && pokemon.type === originalType) {
-     pokemon.name = newName;
-     pokemon.type = newType;
-    } else {
-      return pokemon;
-    }
-  });
-
-  localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon));
-
-const pokemonListItems = document.querySelectorAll(".saved-pokemon");
-pokemonListItems.forEach(item => {
-  if (item.dataset.name === originalName.toLowerCase()){
-    item.querySelector("p").textContent = newName;
-    item.dataset.name = newName.toLowerCase();
-  }
-});
-  } catch (error) {
-    console.error("klarte ikke oppdatere nytt pokemonnavn eller ny type");
   }
 }
 
@@ -322,22 +313,51 @@ function showSavedPokemonList() { //pokemon gets added to my favourite pokemon l
 
     const typeColor = typeColors[type.toLowerCase()];
     listItem.style.backgroundColor = typeColor;
+//made a delete-button incase you refresh the page before you delete the pokemon card: 
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.addEventListener("click", () => {
+      deletePokemonFromListAndLocal(pokemon.name);
+    })
+//styling the delete button (should probably add edit to...):
+    deleteBtn.style.backgroundColor = "rgb(124, 215, 230)";
+    deleteBtn.style.color = "black";
+    deleteBtn.style.border = "none";
+    deleteBtn.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
+    deleteBtn.style.borderRadius = "5px";
+    deleteBtn.style.padding = "5px";
+    deleteBtn.style.cursor = "pointer";
 
     listItem.appendChild(textContainer);
+    listItem.appendChild(deleteBtn);
     favouriteListContainer.appendChild(listItem);
   });
 }
-//This needs alterations:
-function savePokemonData(pokemonName, pokemonType) { //saving pokemon to local storage and list
+//covering my base since I wasn't that smart with my code: 
+function deletePokemonFromListAndLocal(pokemonName) {
+  try {
+    const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || []; 
+    const updatedPokemon = savedPokemon.filter(pokemon => pokemon.name !== pokemonName);
+    localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon)); // Removing Pokemon from localStorage
+
+    const listItem = document.querySelector(`li[data-name="${pokemonName.toLowerCase()}"]`);
+    listItem && listItem.remove(); // Removing from list
+    showSavedPokemonList();
+  } catch (error) {
+    console.error("Klarte ikke slette pokemon", error);
+  }
+}
+
+function savePokemonData(pokemonName, pokemonType) { //saving pokemon to my localStorage and favourite-list
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
     const existingPokemon = savedPokemon.find(pokemon => pokemon.name === pokemonName && pokemon.type === pokemonType);
 
-    if (existingPokemon) {
+    if (existingPokemon) { // this one only works when you haven't altered the pokemon
       alert(`${pokemonName} er allerede lagret`);
       return;
     }
-//I use newName and newType in the edit function, should I implement that in here? 
+
     savedPokemon.push({ name: pokemonName, type: pokemonType });
 
     localStorage.setItem("savedPokemon", JSON.stringify(savedPokemon));
@@ -360,6 +380,7 @@ function savePokemonData(pokemonName, pokemonType) { //saving pokemon to local s
       );
       return;
     }
+    showSavedPokemonList();
   } catch (error) {
     console.error("Klarte ikke lagre pokemon til favorittliste eller localStorage", error);
   }
