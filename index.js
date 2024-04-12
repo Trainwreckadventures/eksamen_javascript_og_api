@@ -1,6 +1,7 @@
 //Things I would have done differently: optimization, smaller functions that I can reuse. Understanding the big picture before I start, understanding how these functions affect eachother.
 //saving project locally, on a usb stick and to github (because my harddrive got corrupted and it affected the entire project).
 //keep it simple! there is a lot of text and I would love to get better at writing shorter (including shorthand) and more functional code. 
+//I have used what I learned in a previous group asignment from school: Arbeidskrav 2 (I will list the link as a source in README!)
 
 const typeColors = {  //the 18 typecolors for the pokemon 
   bug: "rgb(148, 188, 74)",
@@ -67,7 +68,7 @@ let pokemonDataArray = []; //made an array for the fetched pokemon
 async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
   try {
     let pokemonID = 0; // giving the pokemon individual id as they load
-    let offset = 0; 
+    let offset = 0;  //starting from the beginning of the pokeapi list
     const typesCount = new Map(); //keeping track of the types I have encountered
     const fetchedURL = new Set(); //keeping track of the pokemon I have loaded
 
@@ -75,14 +76,14 @@ async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
       typesCount.set(type, 0);
     });
 
-    while (pokemonID < 50) { 
+    while (pokemonID < 50) {  //as long as my pokemon count is under 50 do this:
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/?limit=50&offset=${offset}` //fetching 50 pokemon, the offset is part of the pagination
       );
       const data = await response.json();
       const pokemonList = data.results;
       
-        pokemonList.sort(() => Math.random() - 0.5); //making the fetch a little random
+        pokemonList.sort(() => Math.random() - 0.5); //making list order random
 
       for (const pokemon of pokemonList) { //when we reach 50 it stops
         if (pokemonID >= 50) { 
@@ -107,9 +108,9 @@ async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
       }
 
       offset += 400; //starting 400 spots away from where I started in the api (pagination is usefull)
-      if (offset >= data.count || pokemonID >= 50) {
+      if (offset >= data.count || pokemonID >= 50) { 
         break;  //breaks the while loop
-      } //I had to get chat gpt to explain the consept of pagination to me as if I was a child...
+      } //I had to get chat gpt to explain the consept of pagination to me as if I was a child, it helped me understand how to use the offset in my fetch function.
     }
     pokemonDataArray.forEach((pokemonData, index) => { 
       displayPokemon(pokemonData, index);
@@ -119,7 +120,7 @@ async function fetchAndDisplayPokemon() { //fetching pokemon from the pokeapi
   }
 }
 
-function displayPokemon(data) { //I have done some of the styling in js
+function displayPokemon(data) { //I have done some of the styling in js, but prefer to keep it separate in css (there are so many lines!)
   const name = data.name;
   const type = data.types[0].type.name;
   const typeColor = typeColors[type];
@@ -166,17 +167,23 @@ function displayPokemon(data) { //I have done some of the styling in js
     makeYourOwn(nameElement, typeElement); 
   });
 
-  const saveBtn = document.createElement("button"); //save btn
+  const saveBtn = document.createElement("button"); //save btn (the one on the pokemon card)
   saveBtn.textContent = "Save";
   saveBtn.classList.add("save-btn", "cardBtn");
   saveBtn.style.marginLeft = "30px";
   saveBtn.addEventListener("click", () => savePokemonData(name, type)); //calling on my save function
 
-  const deleteBtn = document.createElement("button");
+  const deleteBtn = document.createElement("button"); // delete button (also on the card)
   deleteBtn.textContent = "Delete";
   deleteBtn.classList.add("delete-btn", "cardBtn");
   deleteBtn.style.marginLeft = "25px";
-  deleteBtn.addEventListener("click", () => deletePokemonData(name));
+  deleteBtn.addEventListener("click", () => {
+    if(card.dataset.cuztomized === "true") {
+      deletePokemonData(newName);
+    } else {
+      deletePokemonData(name);
+    }
+});
 
   card.appendChild(nameElement);  //make sure everything is appended so I can see it
   card.appendChild(typeElement); //tried to write it in shorthand but it started performing weirdly 
@@ -186,7 +193,7 @@ function displayPokemon(data) { //I have done some of the styling in js
   card.appendChild(deleteBtn);
 
   cardWrapper.appendChild(card);
-  cardContainer.appendChild(cardWrapper);
+  cardContainer.appendChild(cardWrapper); 
 
   cardContainer.style.display = "flex"; //styling for my pokemon cards
   cardContainer.style.flexDirection = "column";
@@ -202,9 +209,10 @@ function displayPokemon(data) { //I have done some of the styling in js
   card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
 
-async function fetchReplacementPokemon() { //getting 1 random pokemon from pokeapi
+async function fetchReplacementPokemon() { //getting 1 random pokemon from pokeapi (getting a lot of errors here)
   try {
     const pokemonResponse = await fetch("https://pokeapi.co/api/v2/pokemon/");
+
     const data = await pokemonResponse.json();
     const randomPokemon = Math.floor(Math.random() * data.count) + 1;
     const randomPokemonUrl = `https://pokeapi.co/api/v2/pokemon/${randomPokemon}`;
@@ -236,6 +244,7 @@ function deletePokemonData(pokemonName) { //function to delete the pokemon from 
     const removePokemonFromList = document.getElementById("favourite-pokemon-list").querySelector(`li[data-name="${pokemonName}"]`); 
     removePokemonFromList && removePokemonFromList.remove(); //removing from list
 
+    showSavedPokemonList();
     fetchReplacementPokemon(); //instead of calling fetchAndDisplay we call a function that only replaces the one you just deleted
   } catch (error) {
     console.error("Her gikk noe galt", error);
@@ -264,7 +273,7 @@ function makeYourOwn(nameElement, typeElement) {
 
       const imageElement = card.querySelector("img");
 
-      if (!card.dataset.customized) { //manually disabled these because of the infinate save bug, if it is already customized the buttons will no longer work.
+      if (!card.dataset.customized) { //manually disabled these buttons because of the infinate save bug. This part of code was a workaround suggestion from chat GPT
         const defaultImg = document.querySelector(".default-img");
         imageElement.src = defaultImg.src;
         card.dataset.customized = "true"; 
@@ -285,7 +294,7 @@ function makeYourOwn(nameElement, typeElement) {
   }
 }
 
-function editPokemonListAndStorage(pokemonName, newName, newType) { //function for editing pokemon that are saved to list/storage
+function editPokemonListAndStorage(pokemonName, newName, newType) { //function for editing pokemon that are saved to list/storage 
   const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
   
   const index = savedPokemon.findIndex(pokemon => pokemon.name === pokemonName);
@@ -312,19 +321,19 @@ function showSavedPokemonList() { //this is what shows up in the favourite list 
     const name = pokemon.name;
     const type = pokemon.type;
 
-    const listItem = document.createElement("li");
+    const listItem = document.createElement("li"); //creating a list
     listItem.classList.add("saved-pokemon");
 
-    const textContainer = document.createElement("div");
+    const textContainer = document.createElement("div"); 
     textContainer.classList.add("pokemon-info");
 
-    const nameElement = document.createElement("p");
+    const nameElement = document.createElement("p"); //name text 
     nameElement.textContent = name;
 
-    const typeElement = document.createElement("p");
+    const typeElement = document.createElement("p"); //type text
     typeElement.textContent = `Type: ${type}`;
 
-    textContainer.appendChild(nameElement);
+    textContainer.appendChild(nameElement); //and nothing ever shows up if we dont append...
     textContainer.appendChild(typeElement);
 
     const typeColor = typeColors[type.toLowerCase()];
@@ -339,8 +348,8 @@ function showSavedPokemonList() { //this is what shows up in the favourite list 
       deletePokemonFromListAndLocal(pokemon.name);
     });
     styleButton(deleteBtn);
-
-    const editBtn = document.createElement("button"); //edit directly in list
+//The card doesn't get updated when you edit with this, only list and localStorage, that needs fixing!
+    const editBtn = document.createElement("button"); //edit directly in list (because I changed the edit on the card to a make your own pokemon button)
 editBtn.textContent = "Edit";
 editBtn.classList.add("list-edit-btn");
 editBtn.addEventListener("click", () => {
@@ -379,15 +388,19 @@ function deletePokemonFromListAndLocal(pokemonName) {
     const updatedPokemon = savedPokemon.filter(pokemon => pokemon.name !== pokemonName);
     localStorage.setItem("savedPokemon", JSON.stringify(updatedPokemon)); // Removing Pokemon from localStorage
 
+    const removePokemonCard = document.querySelector(`.pokemon-card[data-name="${pokemonName}"]`); 
+    removePokemonCard && removePokemonCard.remove(); //removing the card
+
     const listItem = document.querySelector(`li[data-name="${pokemonName.toLowerCase()}"]`);
     listItem && listItem.remove(); // Removing from list
+    
     showSavedPokemonList();
   } catch (error) {
     console.error("Klarte ikke slette pokemon", error);
   }
 }
 //now I can finally see the last favorit pokemon with styling....
-function savePokemonData(pokemonName, pokemonType) {
+function savePokemonData(pokemonName, pokemonType) { 
   try {
     const savedPokemon = JSON.parse(localStorage.getItem("savedPokemon")) || [];
     if (savedPokemon.length >= 5) {

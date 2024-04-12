@@ -7,7 +7,6 @@ oppgave 2 Pokemon battle: 3 filer (html, js, css).
 API used: 
 https://pokeapi.co/
 https://api.chucknorris.io/
-https://randomfox.ca/
 
 Pokemon type colors:
 
@@ -38,5 +37,13 @@ https://www.rapidtables.com/convert/color/hex-to-rgb.html)
 images from:
 https://www.freeiconspng.com/
 https://www.cleanpng.com/
+
+other sources:
+My previous game assignment from school:
+https://github.com/Trainwreckadventures/Arbeidskrav-1
+My and my fellow students last api project
+https://github.com/torhodhog/Gruppeoppgave.JS.Gokstad/blob/main/Dating-app/script.js
+chatGPT3.5:
+For rubberducking, brainstorming and bug fixes. 
 
 Number of students working on this project: 1 (Hi, I'm the student/problem it's me).
