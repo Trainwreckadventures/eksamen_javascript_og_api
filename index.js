@@ -209,9 +209,10 @@ function displayPokemon(data) { //I have done some of the styling in js, but pre
   card.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.4)";
 }
 
-async function fetchReplacementPokemon() { //getting 1 random pokemon from pokeapi
+async function fetchReplacementPokemon() { //getting 1 random pokemon from pokeapi (getting a lot of errors here)
   try {
     const pokemonResponse = await fetch("https://pokeapi.co/api/v2/pokemon/");
+
     const data = await pokemonResponse.json();
     const randomPokemon = Math.floor(Math.random() * data.count) + 1;
     const randomPokemonUrl = `https://pokeapi.co/api/v2/pokemon/${randomPokemon}`;
